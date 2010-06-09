@@ -6,7 +6,7 @@
  *
  * @category Shell
  * @package  Subway
- * @version  0.1
+ * @version  0.2
  * @author   Jose Diaz-Gonzalez
  * @license  http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link     http://www.josediazgonzalez.com
@@ -20,8 +20,20 @@ class InflectShell extends Shell {
 	var $validMethods = array(
 		'pluralize', 'singularize', 'camelize',
 		'underscore', 'humanize', 'tableize',
-		'classify', 'variable', 'slug', 'quit'
+		'classify', 'variable', 'slug'
 	);
+
+/**
+ * valid inflection rules
+ *
+ * @var string
+ **/
+	var $validCommands = array(
+		'pluralize', 'singularize', 'camelize',
+		'underscore', 'humanize', 'tableize',
+		'classify', 'variable', 'slug', 'all', 'quit'
+	);
+
 
 /**
  * Inflects words
@@ -58,7 +70,7 @@ class InflectShell extends Shell {
  **/
 	function __getMethod() {
 		$validCharacters = array('1', '2', '3', '4', '5', '6', '7', '8', '9', 'q');
-		$validCommands = array_merge($validCharacters, $this->validMethods);
+		$validCommands = array_merge($validCharacters, $this->validCommands);
 
 		$command = null;
 		while (empty($command)) {
@@ -156,7 +168,7 @@ class InflectShell extends Shell {
 		$words = null;
 		$function = $arguments[0];
 		unset($arguments[0]);
-		if (!in_array($function, $this->validMethods)) {
+		if (!in_array($function, array_merge($this->validMethods, array('all')))) {
 			$function = $this->__getMethod();
 		}
 
@@ -182,8 +194,16 @@ class InflectShell extends Shell {
  * @author savant
  **/
 	function __inflect($function, $words) {
-		$functionName = $this->__getMessage($function);
-		$this->out("{$functionName} of '{$words}': " . Inflector::$function($words));
+		$this->out($words);
+		if ($function === 'all') {
+			foreach ($this->validMethods as $method) {
+				$functionName = $this->__getMessage($method);
+				$this->out("{$functionName}: " . Inflector::$method($words));
+			}
+		} else {
+			$functionName = $this->__getMessage($function);
+			$this->out("{$functionName}: " . Inflector::$function($words));
+		}
 	}
 
 /**
@@ -194,15 +214,15 @@ class InflectShell extends Shell {
  **/
 	function __getMessage($function) {
 		$messages = array(
-			'camelize' => 'CamelCase form',
-			'classify' => 'Cake Model Class form',
-			'humanize' => 'Human Readable Group form',
-			'singularize' => 'Singular form',
-			'slug' => 'Slugged_form',
-			'pluralize' => 'Pluralized form',
-			'tableize' => 'table_names form',
-			'underscore' => 'under_scored_form',
-			'variable' => 'variableForm'
+			'camelize' => 		'CamelCase form             ',
+			'classify' => 		'Cake Model Class form      ',
+			'humanize' => 		'Human Readable Group form  ',
+			'singularize' =>	'Singular form              ',
+			'slug' => 			'Slugged_form               ',
+			'pluralize' => 		'Pluralized form            ',
+			'tableize' => 		'table_names form           ',
+			'underscore' => 	'under_scored_form          ',
+			'variable' => 		'variableForm               '
 		);
 		return $messages[$function];
 	}
